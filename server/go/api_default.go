@@ -10,7 +10,6 @@
 package openapi
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -49,7 +48,7 @@ func NewDefaultApiController(s DefaultApiServicer, opts ...DefaultApiOption) Rou
 
 // Routes returns all of the api route for the DefaultApiController
 func (c *DefaultApiController) Routes() Routes {
-	return Routes{ 
+	return Routes{
 		{
 			"PetsIdGet",
 			strings.ToUpper("Get"),
@@ -59,7 +58,7 @@ func (c *DefaultApiController) Routes() Routes {
 	}
 }
 
-// PetsIdGet - 
+// PetsIdGet -
 func (c *DefaultApiController) PetsIdGet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	idParam, err := parseInt64Parameter(params["id"], true)
