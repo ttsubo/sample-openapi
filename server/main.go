@@ -19,8 +19,8 @@ import (
 func main() {
 	log.Printf("Server started")
 
-	DefaultApiService := openapi.NewDefaultApiService()
-	DefaultApiController := openapi.NewDefaultApiController(DefaultApiService)
+	DefaultMockService := openapi.NewDefaultMockService()
+	DefaultApiController := openapi.NewDefaultApiController(DefaultMockService)
 
 	router := openapi.NewRouter(DefaultApiController)
 

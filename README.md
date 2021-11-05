@@ -119,3 +119,77 @@ When accessing to openapi server from another terminal ...
 "PetsIdGet method not implemented"
 501
 ```
+
+## Applying Mock Service
+
+### Step4) Try to confirm how it works
+Describe Mock service
+
+```
+% git diff --cached
+diff --git a/server/go/api_mock_service.go b/server/go/api_mock_service.go
+new file mode 100644
+index 0000000..3a1d7f5
+--- /dev/null
++++ b/server/go/api_mock_service.go
+@@ -0,0 +1,24 @@
++package openapi
++
++import (
++       "context"
++)
++
++// mock用の新しいservice構造体
++type DefaultMockService struct {
++}
++
++// mock用サービスのコンストラクタ
++func NewDefaultMockService() DefaultApiServicer {
++    return &DefaultMockService{}
++}
++
++// mock用serviceのメソッド
++func (s *DefaultMockService) PetsIdGet(ctx context.Context, id int64) (ImplResponse, error) {
++    pet := Pets{
++        Id:     id,
++        Name:   "doggie",
++        Status: "available",
++    }
++    return Response(200, pet), nil
++}
+diff --git a/server/main.go b/server/main.go
+index 9e407b8..b1a5681 100644
+--- a/server/main.go
++++ b/server/main.go
+@@ -19,8 +19,8 @@ import (
+ func main() {
+        log.Printf("Server started")
+
+-       DefaultApiService := openapi.NewDefaultApiService()
+-       DefaultApiController := openapi.NewDefaultApiController(DefaultApiService)
++       DefaultMockService := openapi.NewDefaultMockService()
++       DefaultApiController := openapi.NewDefaultApiController(DefaultMockService)
+
+        router := openapi.NewRouter(DefaultApiController)
+```
+
+### Step5) Try to confirm how it works
+After applying Mock Service, try to run openapi server again
+
+```
+% go run main.go
+2021/11/05 14:46:20 Server started
+```
+
+When accessing to openapi server from another terminal ...
+```
+% curl http://localhost:8080/pets/1                    
+{"id":1,"name":"doggie","status":"available"}
+```
+```
+% curl http://localhost:8080/pets/1 -w '%{http_code}\n'
+{"id":1,"name":"doggie","status":"available"}
+200
+```
+
+... That's all
