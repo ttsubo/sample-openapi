@@ -192,4 +192,100 @@ When accessing to openapi server from another terminal ...
 200
 ```
 
+## Generating openapi client
+
+### Step6) Executing openapi-generator for client
+```
+% openapi-generator generate -i openapi.yml -g go -o ./client/openapi
+[main] INFO  o.o.codegen.DefaultGenerator - Generating with dryRun=false
+[main] INFO  o.o.c.ignore.CodegenIgnoreProcessor - Output directory (/Users/ttsubo/source/sample-openapi/./client/openapi) does not exist, or is inaccessible. No file (.openapi-generator-ignore) will be evaluated.
+[main] INFO  o.o.codegen.DefaultGenerator - OpenAPI Generator: go (client)
+[main] INFO  o.o.codegen.DefaultGenerator - Generator 'go' is considered stable.
+[main] INFO  o.o.c.languages.AbstractGoCodegen - Environment variable GO_POST_PROCESS_FILE not defined so Go code may not be properly formatted. To define it, try `export GO_POST_PROCESS_FILE="/usr/local/bin/gofmt -w"` (Linux/Mac)
+[main] INFO  o.o.c.languages.AbstractGoCodegen - NOTE: To enable file post-processing, 'enablePostProcessFile' must be set to `true` (--enable-post-process-file for CLI).
+[main] INFO  o.o.codegen.utils.URLPathUtils - 'host' (OAS 2.0) or 'servers' (OAS 3.0) not defined in the spec. Default to [http://localhost] for server URL [http://localhost/]
+[main] INFO  o.o.codegen.utils.URLPathUtils - 'host' (OAS 2.0) or 'servers' (OAS 3.0) not defined in the spec. Default to [http://localhost] for server URL [http://localhost/]
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/model_pets.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/docs/Pets.md
+[main] WARN  o.o.codegen.DefaultCodegen - Empty operationId found for path: get /pets/{id}. Renamed to auto-generated operationId: petsIdGet
+[main] INFO  o.o.codegen.utils.URLPathUtils - 'host' (OAS 2.0) or 'servers' (OAS 3.0) not defined in the spec. Default to [http://localhost] for server URL [http://localhost/]
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/api_default.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/docs/DefaultApi.md
+[main] INFO  o.o.codegen.utils.URLPathUtils - 'host' (OAS 2.0) or 'servers' (OAS 3.0) not defined in the spec. Default to [http://localhost] for server URL [http://localhost/]
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/api/openapi.yaml
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/README.md
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/git_push.sh
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/.gitignore
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/configuration.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/client.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/response.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/go.mod
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/go.sum
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/.travis.yml
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/utils.go
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/.openapi-generator-ignore
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/.openapi-generator/VERSION
+[main] INFO  o.o.codegen.TemplateManager - writing file /Users/ttsubo/source/sample-openapi/./client/openapi/.openapi-generator/FILES
+################################################################################
+# Thanks for using OpenAPI Generator.                                          #
+# Please consider donation to help us maintain this project 🙏                 #
+# https://opencollective.com/openapi_generator/donate                          #
+################################################################################
+```
+
+### Step7) Try to confirm how it works
+After customizing go.mod environment, you need to describe main.go
+
+```
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/ttsubo/sample-openapi/client/openapi"
+)
+
+func main() {
+    cfg := openapi.NewConfiguration()
+    c := openapi.NewAPIClient(cfg)
+
+    ctx := context.Background()
+    pets, _, err := c.DefaultApi.PetsIdGetExecute(c.DefaultApi.PetsIdGet(ctx, 1))
+
+    fmt.Printf("[{id: %d}, ", *pets.Id)
+    fmt.Printf("{name: %s}, ", *pets.Name)
+    fmt.Printf("{status: %s}]\n", *pets.Status)
+    fmt.Println(err)
+}
+```
+
+### Step8) Setting Server URL in configuration.go
+
+```
+% git diff configuration.go
+diff --git a/client/openapi/configuration.go b/client/openapi/configuration.go
+index 09f434d..1560585 100644
+--- a/client/openapi/configuration.go
++++ b/client/openapi/configuration.go
+@@ -105,7 +105,7 @@ func NewConfiguration() *Configuration {
+                Debug:            false,
+                Servers:          ServerConfigurations{
+                        {
+-                               URL: "",
++                               URL: "http://localhost:8080",
+                                Description: "No description provided",
+                        },
+                },
+```
+
+### Step9) Try to confirm how it works
+While openapi server works, try to run openapi client
+
+```
+% go run main.go
+[{id: 1}, {name: doggie}, {status: available}]
+<nil>
+```
+
 ... That's all
