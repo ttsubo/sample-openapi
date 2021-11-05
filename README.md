@@ -1,6 +1,20 @@
-# Practice OpenAPI using openapi-generator
+# Practice OpenAPI using OpenAPI Generator
 
-## Preparing openapi.yml
+This page indicates how to use [OpenAPI Generator](https://openapi-generator.tech) as initial practice
+
+## Initial confirming
+
+### Step0) Installing OpenAPI Generator on MacOS
+
+```
+$ brew install openapi-generator
+```
+```
+% openapi-generator version
+5.3.0
+```
+
+### Step1) Preparing openapi.yml
 
 ```
 openapi: 3.0.1
@@ -49,7 +63,7 @@ components:
           - pending
           - sold
 ```
-## Executing openapi-generator for server
+### Step2) Executing openapi-generator for server
 ```
 % openapi-generator generate -i openapi.yml -g go-server -o ./server
 [main] INFO  o.o.codegen.DefaultGenerator - Generating with dryRun=false
@@ -85,4 +99,23 @@ components:
 # Please consider donation to help us maintain this project 🙏                 #
 # https://opencollective.com/openapi_generator/donate                          #
 ################################################################################
+```
+
+### Step3) Try to confirm how it works
+After customizing go.mod environment, try to run openapi server
+
+```
+% go run main.go      
+2021/11/05 10:25:05 Server started
+```
+
+When accessing to openapi server from another terminal ...
+```
+% curl http://localhost:8080/pets/1
+"PetsIdGet method not implemented"
+```
+```
+% curl http://localhost:8080/pets/1 -w '%{http_code}\n'
+"PetsIdGet method not implemented"
+501
 ```
